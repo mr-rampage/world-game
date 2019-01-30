@@ -5,16 +5,16 @@
     <title>World Game</title>
     <script>
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('src/services/cache.js')
+          navigator.serviceWorker.register('src/cache.js')
             .then(() => {
-              const world = new Worker('src/services/destination.js');
-              world.addEventListener('message', (e) => {
+              const villain = new Worker('src/villain.actor.js');
+              villain.addEventListener('message', (e) => {
                 console.info(e.data);
               }, false);
-              world.postMessage(null);
-              world.postMessage(null);
-              world.postMessage(null);
-              world.postMessage(null);
+              villain.postMessage('flee');
+              villain.postMessage('flee');
+              villain.postMessage('flee');
+              villain.postMessage('flee');
             });
         });
     </script>
