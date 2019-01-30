@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>World Game</title>
+    <script>
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('src/services/cache.js')
+            .then(() => {
+              const world = new Worker('src/services/destination.js');
+              world.addEventListener('message', (e) => {
+                console.info(e.data);
+              }, false);
+              world.postMessage(null);
+              world.postMessage(null);
+              world.postMessage(null);
+              world.postMessage(null);
+            });
+        });
+    </script>
+</head>
+<body>
+
+</body>
+</html>
