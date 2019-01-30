@@ -32,7 +32,7 @@
 
         function onArrival(witnessManager) {
           witnessManager.next(); // not sure why I need to call this first to get things primed
-          return () => {
+          return event => {
             console.info('onArrival', witnessManager.next(event.data.witnesses).value);
           };
         }

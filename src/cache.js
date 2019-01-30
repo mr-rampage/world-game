@@ -1,18 +1,24 @@
+self.addEventListener('install', event =>
+  event.waitUntil(caches.open('world-game'))
+);
+
 self.addEventListener('fetch', event =>
-  event.respondWith(caches.open('world-game').then(findResponse(event.request))));
+  event.respondWith(caches.match(event.request).then(findResponse(caches, event.request))));
 
-function cacheRequest(cache, request) {
+function cacheRequest(caches, request) {
   return fetch(request)
-    .then(cacheResponse.bind(null, cache, request));
+    .then(cacheResponse(caches, request));
 }
 
-function cacheResponse(cache, request, response) {
-  cache.put(request, response.clone());
-  return response;
+function cacheResponse(caches, request) {
+  return response => {
+    const cloned = response.clone();
+    caches.open('world-game')
+      .then(cache => cache.put(request, cloned));
+    return response;
+  };
 }
 
-function findResponse(request) {
-  return cache => cache
-    .match(request)
-    .then(response => response || cacheRequest(cache, request));
+function findResponse(caches, request) {
+  return response => response || cacheRequest(caches, request);
 }
