@@ -1,8 +1,13 @@
-self.addEventListener('message', function(e) {
-  switch(e.data) {
-    case 'flee': return flee().then(self.postMessage);
-  }
-}, false);
+self.addEventListener('message', function() {
+    return flee()
+      .then(leaveClues)
+      .then(self.postMessage);
+});
+
+function leaveClues(destinations) {
+  const witnesses = ['Bank', 'Library', 'Airport'];
+  return { destinations, witnesses };
+}
 
 function flee() {
   return fetch('https://restcountries.eu/rest/v2/all')

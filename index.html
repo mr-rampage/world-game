@@ -8,15 +8,34 @@
           navigator.serviceWorker.register('src/cache.js')
             .then(() => {
               const villain = new Worker('src/villain.actor.js');
-              villain.addEventListener('message', (e) => {
-                console.info(e.data);
-              }, false);
+              villain.addEventListener('message', onArrival(witnessManager()));
               villain.postMessage('flee');
-              villain.postMessage('flee');
-              villain.postMessage('flee');
-              villain.postMessage('flee');
+              setTimeout(() => villain.postMessage('flee'), 2000);
+              setTimeout(() => villain.postMessage('flee'), 4000);
+              setTimeout(() => villain.postMessage('flee'), 6000);
             });
         });
+
+        function* witnessManager() {
+          let workers = null;
+
+          while (true) {
+            let witnesses = yield workers;
+            if (workers !== null) {
+              console.info('Terminating witness workers');
+              workers.forEach(worker => worker.terminate());
+            }
+            console.info('Spawning witness workers');
+            workers = witnesses.map(() => new Worker('src/witness.actor.js'));
+          }
+        }
+
+        function onArrival(witnessManager) {
+          witnessManager.next(); // not sure why I need to call this first to get things primed
+          return () => {
+            console.info('onArrival', witnessManager.next(event.data.witnesses).value);
+          };
+        }
     </script>
 </head>
 <body>
