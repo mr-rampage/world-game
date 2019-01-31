@@ -1,8 +1,4 @@
-self.addEventListener('message', function() {
-    return flee()
-      .then(leaveClues)
-      .then(self.postMessage);
-});
+self.addEventListener('message', () => flee().then(leaveClues).then(self.postMessage));
 
 function leaveClues(destinations) {
   const witnesses = ['Bank', 'Library', 'Airport'];

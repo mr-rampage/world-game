@@ -7,16 +7,19 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('src/cache.js')
             .then(() => {
-              const villain = new Worker('src/villain.actor.js');
-              villain.addEventListener('message', onArrival(witnessManager()));
-              villain.postMessage('flee');
-              setTimeout(() => villain.postMessage('flee'), 2000);
-              setTimeout(() => villain.postMessage('flee'), 4000);
-              setTimeout(() => villain.postMessage('flee'), 6000);
+              const countryActor = new Worker('src/country.actor.js');
+              countryActor.addEventListener('message', function({data: description}) {
+                console.info(description)
+              });
+
+              const villainActor = new Worker('src/villain.actor.js');
+              villainActor.addEventListener('message', onArrival(witnessActors(), countryActor));
+
+              villainActor.postMessage('flee');
             });
         });
 
-        function* witnessManager() {
+        function* witnessActors() {
           let workers = null;
 
           while (true) {
@@ -28,15 +31,11 @@
           }
         }
 
-        function onArrival(witnessManager) {
-          const countryActor = new Worker('src/country.actor.js');
-          countryActor.addEventListener('message', function({data: description}) {
-            console.info(description)
-          });
-          witnessManager.next(); // not sure why I need to call this first to get things primed
+        function onArrival(witnessActors, countryActor) {
+          witnessActors.next(); // not sure why I need to call this first to get things primed
           return ({data: villain}) => {
             countryActor.postMessage(villain.destinations[0].name);
-            console.info('onArrival', witnessManager.next(villain.witnesses).value);
+            console.info('onArrival', witnessActors.next(villain.witnesses).value);
           };
         }
     </script>
