@@ -7,35 +7,33 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('src/cache.js')
             .then(() => {
-              const countryActor = new Worker('src/country.actor.js');
-              countryActor.addEventListener('message', function({data: description}) {
-                console.info(description)
-              });
-
-              const villainActor = new Worker('src/villain.actor.js');
-              villainActor.addEventListener('message', onArrival(witnessActors(), countryActor));
-
+              const countryActor = actor('src/country.actor.js', ({data: description}) => console.info(description));
+              const villainActor = actor('src/villain.actor.js', clueHandler(witnessActors(), countryActor));
               villainActor.postMessage('flee');
             });
         });
 
+        function actor(script, handler = () => {}) {
+          const worker = new Worker(script);
+          worker.addEventListener('message', handler);
+          return worker;
+        }
+
         function* witnessActors() {
-          let workers = null;
+          let workers = [];
 
           while (true) {
-            let witnesses = yield workers;
-            if (workers !== null) {
-              workers.forEach(worker => worker.terminate());
-            }
-            workers = witnesses.map(() => new Worker('src/witness.actor.js'));
+            const witnesses = yield workers;
+            workers.forEach(worker => worker.terminate());
+            workers = witnesses.map(() => actor('src/witness.actor.js'));
           }
         }
 
-        function onArrival(witnessActors, countryActor) {
+        function clueHandler(witnessActors, countryActor) {
           witnessActors.next(); // not sure why I need to call this first to get things primed
           return ({data: villain}) => {
             countryActor.postMessage(villain.destinations[0].name);
-            console.info('onArrival', witnessActors.next(villain.witnesses).value);
+            witnessActors.next(villain.witnesses);
           };
         }
     </script>
