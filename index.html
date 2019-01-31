@@ -22,18 +22,21 @@
           while (true) {
             let witnesses = yield workers;
             if (workers !== null) {
-              console.info('Terminating witness workers');
               workers.forEach(worker => worker.terminate());
             }
-            console.info('Spawning witness workers');
             workers = witnesses.map(() => new Worker('src/witness.actor.js'));
           }
         }
 
         function onArrival(witnessManager) {
+          const countryActor = new Worker('src/country.actor.js');
+          countryActor.addEventListener('message', function({data: description}) {
+            console.info(description)
+          });
           witnessManager.next(); // not sure why I need to call this first to get things primed
-          return event => {
-            console.info('onArrival', witnessManager.next(event.data.witnesses).value);
+          return ({data: villain}) => {
+            countryActor.postMessage(villain.destinations[0].name);
+            console.info('onArrival', witnessManager.next(villain.witnesses).value);
           };
         }
     </script>
