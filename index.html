@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <title>World Game</title>
     <script>
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('src/cache.js')
-            .then(() => {
-              const countryActor = actor('src/country.actor.js', updateCountryDescription);
-              const villainActor = actor('src/villain.actor.js', clueHandler(witnessActors(), countryActor));
-              introduce(villainActor, countryActor);
-              document.querySelector('button').addEventListener('click', () => {
-                  villainActor.postMessage({command: 'flee'})
-                });
-            });
-        });
+        window.addEventListener('load', main);
+
+        async function main() {
+          await navigator.serviceWorker.register('src/cache.js');
+
+          const countryActor = actor('src/country.actor.js', updateCountryDescription);
+          const villainActor = actor('src/villain.actor.js', clueHandler(witnessActors(), countryActor));
+          introduce(villainActor, countryActor);
+
+          document.querySelector('button').addEventListener('click', () => {
+            villainActor.postMessage({command: 'flee'})
+          });
+        }
 
         function updateCountryDescription({data: description}) {
           document.querySelector('.country-description').textContent = description;
