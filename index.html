@@ -9,9 +9,15 @@
             .then(() => {
               const countryActor = actor('src/country.actor.js', ({data: description}) => console.info(description));
               const villainActor = actor('src/villain.actor.js', clueHandler(witnessActors(), countryActor));
-              villainActor.postMessage('flee');
+              introduce(villainActor, countryActor);
             });
         });
+
+        function introduce(actor1, actor2) {
+          const channel = new MessageChannel();
+          actor1.postMessage({command: 'open-channel', message: channel.port1}, [channel.port1]);
+          actor2.postMessage({command: 'open-channel', message: channel.port2}, [channel.port2]);
+        }
 
         function actor(script, handler = () => {}) {
           const worker = new Worker(script);

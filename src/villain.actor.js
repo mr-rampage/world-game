@@ -1,8 +1,26 @@
-self.addEventListener('message', () => flee().then(leaveClues).then(self.postMessage));
+importScripts('worker-utils.js');
+self.addEventListener('message', messageHandler);
+
+function messageHandler(e) {
+  const {command, message} = e.data;
+  switch (command) {
+    case 'open-channel':
+      openChannel(message, messageHandler);
+      break;
+    case 'log':
+      log(message);
+      break;
+    case 'flee':
+      flee().then(self.postMessage);
+      break;
+    default:
+      break;
+  }
+}
 
 function leaveClues(destinations) {
   const witnesses = ['Bank', 'Library', 'Airport'];
-  return { destinations, witnesses };
+  return {destinations, witnesses};
 }
 
 function flee() {
@@ -12,7 +30,8 @@ function flee() {
       destinations[randomInt(destinations.length)],
       destinations[randomInt(destinations.length)],
       destinations[randomInt(destinations.length)]
-    ]);
+    ])
+    .then(leaveClues)
 }
 
 function randomInt(max) {
