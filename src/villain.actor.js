@@ -5,15 +5,17 @@ async function messageHandler(e) {
   const {command, message} = e.data;
   switch (command) {
     case 'open-channel':
-      openChannel(message, messageHandler);
+      openChannel(message, messageHandler)
+        .postMessage({command: 'log', message: 'Greetings from Villain Actor'});
       break;
     case 'log':
-      log(message);
+      log('Villain', message);
       break;
     case 'flee':
-      self.postMessage(await flee());
+      self.postMessage(await flee(), undefined);
       break;
     default:
+      console.warn('Invalid message: ', e.data);
       break;
   }
 }
@@ -31,8 +33,4 @@ async function flee() {
     destinations[randomInt(destinations.length)],
     destinations[randomInt(destinations.length)]
   ]);
-}
-
-function randomInt(max) {
-  return (Math.random() * max) | 0;
 }

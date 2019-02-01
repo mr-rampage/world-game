@@ -1,5 +1,5 @@
-function log(message) {
-  console.info('Message received:', message);
+function log(id, message) {
+  console.info(`Message received at ${id}: `, message);
   return message;
 }
 
@@ -9,3 +9,6 @@ function openChannel(port, handler) {
   return port;
 }
 
+function randomInt(max) {
+  return (Math.random() * max) | 0;
+}
