@@ -7,11 +7,18 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('src/cache.js')
             .then(() => {
-              const countryActor = actor('src/country.actor.js', ({data: description}) => console.info(description));
+              const countryActor = actor('src/country.actor.js', updateCountryDescription);
               const villainActor = actor('src/villain.actor.js', clueHandler(witnessActors(), countryActor));
               introduce(villainActor, countryActor);
+              document.querySelector('button').addEventListener('click', () => {
+                  villainActor.postMessage({command: 'flee'})
+                });
             });
         });
+
+        function updateCountryDescription({data: description}) {
+          document.querySelector('.country-description').textContent = description;
+        }
 
         function introduce(actor1, actor2) {
           const channel = new MessageChannel();
@@ -38,13 +45,14 @@
         function clueHandler(witnessActors, countryActor) {
           witnessActors.next(); // not sure why I need to call this first to get things primed
           return ({data: villain}) => {
-            countryActor.postMessage(villain.destinations[0].name);
+            countryActor.postMessage({command: 'describe-country', message: villain.destinations[0].name});
             witnessActors.next(villain.witnesses);
           };
         }
     </script>
 </head>
 <body>
-
+    <button>Flee</button>
+    <p class="country-description"></p>
 </body>
 </html>
