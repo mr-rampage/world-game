@@ -1,7 +1,7 @@
 importScripts('worker-utils.js');
 self.addEventListener('message', messageHandler);
 
-function messageHandler(e) {
+async function messageHandler(e) {
   const {command, message} = e.data;
   switch (command) {
     case 'open-channel':
@@ -11,7 +11,7 @@ function messageHandler(e) {
       log(message);
       break;
     case 'flee':
-      flee().then(self.postMessage);
+      self.postMessage(await flee());
       break;
     default:
       break;
@@ -23,15 +23,14 @@ function leaveClues(destinations) {
   return {destinations, witnesses};
 }
 
-function flee() {
-  return fetch('https://restcountries.eu/rest/v2/all')
-    .then(response => response.json())
-    .then(destinations => [
-      destinations[randomInt(destinations.length)],
-      destinations[randomInt(destinations.length)],
-      destinations[randomInt(destinations.length)]
-    ])
-    .then(leaveClues)
+async function flee() {
+  const response = await fetch('https://restcountries.eu/rest/v2/all');
+  const destinations = await response.json();
+  return leaveClues([
+    destinations[randomInt(destinations.length)],
+    destinations[randomInt(destinations.length)],
+    destinations[randomInt(destinations.length)]
+  ]);
 }
 
 function randomInt(max) {
